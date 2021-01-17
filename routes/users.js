@@ -1,32 +1,47 @@
 const router = require("express").Router();
-const fs = require("fs");
+const fsPromises = require("fs").promises;
+const path = require("path");
 
-// чтение файла с пользователями
+const filepath = path.join("data", "users.json");
 let users = [];
-fs.readFile("./data/users.json", "utf8", (err, data) => {
-  if (err) throw err;
-  users = JSON.parse(data);
-});
+
+const fileData = () => fsPromises.readFile(filepath, { encoding: "utf8" });
+
+const response = (res, status, data) => {
+  res.status(status).send(data);
+};
 
 // отправка полного списка пользователей
-router.get("/", (req, res) => {
-  res.send(users);
+router.get("/users", (req, res) => {
+  fileData()
+    .then((data) => {
+      users = JSON.parse(data);
+      response(res, 200, users);
+    })
+    .catch((err) => {
+      response(res, 500, { message: err.message });
+    });
 });
 
 // поиск пользователя по id
-router.get("/:id", (req, res) => {
+router.get("/users/:id", (req, res) => {
   const { id } = req.params;
 
-  const result = users.find((user) => {
-    return user._id === id;
-  });
+  fileData()
+    .then((data) => {
+      users = JSON.parse(data);
 
-  if (!result) {
-    res.status(404).send({ message: "Нет пользователя с таким id" });
-    return;
-  }
+      const result = users.find((user) => user._id === id);
 
-  res.send(result);
+      if (!result) {
+        response(res, 404, { message: "Нет пользователя с таким id" });
+        return;
+      }
+      response(res, 200, result);
+    })
+    .catch((err) => {
+      response(res, 500, { message: err.message });
+    });
 });
 
 module.exports = router;

@@ -1,13 +1,11 @@
 const express = require("express");
-const cardsRouter = require("./routes/cards");
-const usersRouter = require("./routes/users");
+const routes = require("./routes/index");
+
 const app = express();
 const { PORT = 3000 } = process.env;
 
-app.use(express.static(__dirname + "/public"));
-
-app.use("/cards", cardsRouter); // роутер карточек
-app.use("/users", usersRouter); // роутер пользователей
+app.use(express.static(`${__dirname}/public`));
+app.use(routes);
 
 // заглушка других запросов на несуществующий адрес
 app.get("/*", (req, res) => {
@@ -15,5 +13,6 @@ app.get("/*", (req, res) => {
 });
 
 app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
   console.log(`App listening on port ${PORT}`);
 });
