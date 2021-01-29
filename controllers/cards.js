@@ -33,8 +33,32 @@ function deleteCard(req, res) {
     .catch((err) => res.status(500).send({ message: err.message }));
 }
 
+function setLikeToCard(req, res) {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } },
+    // eslint-disable-next-line comma-dangle
+    { new: true }
+  )
+    .then((data) => res.send(data))
+    .catch((err) => res.status(500).send({ message: err.message }));
+}
+
+function setDislikeToCard(req, res) {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } },
+    // eslint-disable-next-line comma-dangle
+    { new: true }
+  )
+    .then((data) => res.send(data))
+    .catch((err) => res.status(500).send({ message: err.message }));
+}
+
 module.exports = {
   getCards,
   createCard,
   deleteCard,
+  setLikeToCard,
+  setDislikeToCard,
 };
