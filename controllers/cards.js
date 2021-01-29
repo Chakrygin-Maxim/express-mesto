@@ -1,10 +1,11 @@
 const Card = require("../models/card");
+const { sendError } = require("../errors/error");
 
 function getCards(req, res) {
   Card.find({})
     .populate("owner")
     .then((cards) => res.send(cards))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => sendError(res, err));
 }
 
 function createCard(req, res) {
@@ -12,7 +13,7 @@ function createCard(req, res) {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => res.send(card))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => sendError(res, err));
 }
 
 function deleteCard(req, res) {
@@ -20,6 +21,10 @@ function deleteCard(req, res) {
 
   Card.findById(req.params.id)
     .then((card) => {
+      if (card === null) {
+        res.status(404).send({ message: "Карточка не найдена!" });
+        return;
+      }
       if (card.owner.toString() !== currentUserId) {
         res
           .status(403)
@@ -28,9 +33,9 @@ function deleteCard(req, res) {
       }
       Card.findByIdAndDelete(req.params.id)
         .then((data) => res.send(data))
-        .catch((err) => res.status(500).send({ message: err.message }));
+        .catch((err) => sendError(res, err));
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => sendError(res, err));
 }
 
 function setLikeToCard(req, res) {
@@ -40,8 +45,14 @@ function setLikeToCard(req, res) {
     // eslint-disable-next-line comma-dangle
     { new: true }
   )
-    .then((data) => res.send(data))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((data) => {
+      if (data === null) {
+        res.status(404).send({ message: "Карточка не найдена!" });
+        return;
+      }
+      res.send(data);
+    })
+    .catch((err) => sendError(res, err));
 }
 
 function setDislikeToCard(req, res) {
@@ -51,8 +62,14 @@ function setDislikeToCard(req, res) {
     // eslint-disable-next-line comma-dangle
     { new: true }
   )
-    .then((data) => res.send(data))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .then((data) => {
+      if (data === null) {
+        res.status(404).send({ message: "Карточка не найдена!" });
+        return;
+      }
+      res.send(data);
+    })
+    .catch((err) => sendError(res, err));
 }
 
 module.exports = {

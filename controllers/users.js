@@ -1,23 +1,33 @@
 const User = require("../models/user");
+const { sendError } = require("../errors/error");
 
 function getUsers(req, res) {
   User.find({})
     .then((users) => res.send(users))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => sendError(res, err));
 }
 
 function getUser(req, res) {
   User.findById(req.params.id)
-    .then((user) => res.send(user))
-    .catch((err) => res.status(500).send({ message: err.message }));
+
+    .then((user) => {
+      if (user === null) {
+        res.status(404).send({ message: "Пользователь не найден!" });
+        return;
+      }
+      res.send(user);
+    })
+    .catch((err) => sendError(res, err));
 }
 
 function createUser(req, res) {
-  const { name, about } = req.body;
+  const { name, about, avatar } = req.body;
 
-  User.create({ name, about })
-    .then((user) => res.send(user))
-    .catch((err) => res.status(500).send({ message: err.message }));
+  User.create({ name, about, avatar })
+    .then((user) => {
+      res.send(user);
+    })
+    .catch((err) => sendError(res, err));
 }
 
 function updateUserInfo(req, res) {
@@ -31,7 +41,7 @@ function updateUserInfo(req, res) {
     { new: true, runValidators: true }
   )
     .then((data) => res.send(data))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => sendError(res, err));
 }
 
 function updateUserAvatar(req, res) {
@@ -45,7 +55,7 @@ function updateUserAvatar(req, res) {
     { new: true, runValidators: true }
   )
     .then((data) => res.send(data))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => sendError(res, err));
 }
 
 module.exports = {
