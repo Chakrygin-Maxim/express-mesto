@@ -34,9 +34,24 @@ function updateUserInfo(req, res) {
     .catch((err) => res.status(500).send({ message: err.message }));
 }
 
+function updateUserAvatar(req, res) {
+  const currentUserId = req.user._id;
+  const { avatar } = req.body;
+
+  User.findByIdAndUpdate(
+    currentUserId,
+    { avatar },
+    // eslint-disable-next-line comma-dangle
+    { new: true, runValidators: true }
+  )
+    .then((data) => res.send(data))
+    .catch((err) => res.status(500).send({ message: err.message }));
+}
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUserInfo,
+  updateUserAvatar,
 };

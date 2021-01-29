@@ -4,6 +4,7 @@ const {
   getUser,
   createUser,
   updateUserInfo,
+  updateUserAvatar,
 } = require("../controllers/users");
 
 // отправка полного списка пользователей
@@ -17,5 +18,8 @@ router.post("/users", createUser);
 
 // обновление профиля
 router.patch("/users/me", updateUserInfo);
+
+// обновление аватара
+router.patch("/users/me/avatar", updateUserAvatar);
 
 module.exports = router;
