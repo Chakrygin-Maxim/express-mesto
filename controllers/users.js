@@ -13,10 +13,24 @@ function getUser(req, res) {
 }
 
 function createUser(req, res) {
-  const { name, about, avatar } = req.body;
+  const { name, about } = req.body;
 
-  User.create({ name, about, avatar })
+  User.create({ name, about })
     .then((user) => res.send(user))
+    .catch((err) => res.status(500).send({ message: err.message }));
+}
+
+function updateUserInfo(req, res) {
+  const currentUserId = req.user._id;
+  const { name, about } = req.body;
+
+  User.findByIdAndUpdate(
+    currentUserId,
+    { name, about },
+    // eslint-disable-next-line comma-dangle
+    { new: true, runValidators: true }
+  )
+    .then((data) => res.send(data))
     .catch((err) => res.status(500).send({ message: err.message }));
 }
 
@@ -24,4 +38,5 @@ module.exports = {
   getUsers,
   getUser,
   createUser,
+  updateUserInfo,
 };
