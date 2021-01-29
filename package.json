@@ -20,7 +20,9 @@
   },
   "homepage": "https://github.com/Chakrygin-Maxim/express-mesto#readme",
   "dependencies": {
-    "express": "^4.17.1"
+    "express": "^4.17.1",
+    "mongoose": "^5.11.13",
+    "body-parser": "^1.19.0"
   },
   "devDependencies": {
     "eslint": "^7.17.0",
