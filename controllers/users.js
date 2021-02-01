@@ -40,7 +40,13 @@ function updateUserInfo(req, res) {
     // eslint-disable-next-line comma-dangle
     { new: true, runValidators: true }
   )
-    .then((data) => res.send(data))
+    .then((user) => {
+      if (user === null) {
+        res.status(404).send({ message: "Пользователь не найден!" });
+        return;
+      }
+      res.send(user);
+    })
     .catch((err) => sendError(res, err));
 }
 
@@ -54,7 +60,13 @@ function updateUserAvatar(req, res) {
     // eslint-disable-next-line comma-dangle
     { new: true, runValidators: true }
   )
-    .then((data) => res.send(data))
+    .then((user) => {
+      if (user === null) {
+        res.status(404).send({ message: "Пользователь не найден!" });
+        return;
+      }
+      res.send(user);
+    })
     .catch((err) => sendError(res, err));
 }
 
