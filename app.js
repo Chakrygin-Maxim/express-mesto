@@ -29,11 +29,10 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static(`${__dirname}/public`));
 app.use(routes);
 
 // заглушка других запросов на несуществующий адрес
-app.get("/*", (req, res) => {
+app.use("/*", (req, res) => {
   res.status(404).send({ message: "Запрашиваемый ресурс не найден" });
 });
 

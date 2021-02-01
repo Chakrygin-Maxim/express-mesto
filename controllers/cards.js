@@ -20,11 +20,8 @@ function deleteCard(req, res) {
   const currentUserId = req.user._id;
 
   Card.findById(req.params.id)
+    .orFail(res.status(404).send({ message: "Карточка не найдена!" }))
     .then((card) => {
-      if (card === null) {
-        res.status(404).send({ message: "Карточка не найдена!" });
-        return;
-      }
       if (card.owner.toString() !== currentUserId) {
         res
           .status(403)
