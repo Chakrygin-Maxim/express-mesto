@@ -1,4 +1,7 @@
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken"); //* модуль для создания jwt-токенов
 const User = require("../models/user");
+const { JWT_SECRET, JWT_TTL } = require("../config");
 const { sendError } = require("../errors/error");
 
 function getUsers(req, res) {
@@ -20,14 +23,38 @@ function getUser(req, res) {
     .catch((err) => sendError(res, err));
 }
 
-function createUser(req, res) {
-  const { name, about, avatar } = req.body;
+function createUser(req, res, next) {
+  const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => {
-      res.send(user);
+  bcrypt
+    .hash(password, 10)
+    // eslint-disable-next-line no-shadow
+    .then((password) =>
+      User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password,
+      })
+    )
+
+    .then((data) => {
+      res.send({
+        _id: data._id,
+        email: data.email,
+      });
     })
-    .catch((err) => sendError(res, err));
+
+    .catch((error) => {
+      if (error.name === "MongoError" || error.code === 11000) {
+        // пользователь с такой почтой уже существует
+        throw new Error(error.message);
+      }
+
+      throw new Error(error.message);
+    })
+    .catch(next);
 }
 
 function updateUserInfo(req, res) {
@@ -70,10 +97,42 @@ function updateUserAvatar(req, res) {
     .catch((err) => sendError(res, err));
 }
 
+function login(req, res, next) {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: JWT_TTL,
+      });
+      res.status(200).send({ token });
+    })
+    .catch((error) => {
+      throw new Error(error.message);
+    })
+
+    .catch(next);
+}
+
+function userInfo(req, res) {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (user === null) {
+        res.status(404).send({ message: "Пользователь не найден!" });
+        return;
+      }
+      const { _id, name, about, avatar } = user;
+      res.send({ _id, name, about, avatar });
+    })
+    .catch((err) => sendError(res, err));
+}
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUserInfo,
   updateUserAvatar,
+  login,
+  userInfo,
 };
