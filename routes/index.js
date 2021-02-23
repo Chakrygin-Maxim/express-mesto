@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const auth = require("../middlewares/auth");
 const { createUser, login } = require("../controllers/users");
+const { validateNewUser, validateLogin } = require("../middlewares/validation");
 
 const usersRouter = require("./users");
 const cardsRouter = require("./cards");
@@ -11,8 +12,8 @@ router.get("/crash-test", () => {
   }, 0);
 });
 
-router.post("/signin", login);
-router.post("/signup", createUser);
+router.post("/signin", validateLogin, login);
+router.post("/signup", validateNewUser, createUser);
 
 router.use(auth);
 router.use(usersRouter, cardsRouter);

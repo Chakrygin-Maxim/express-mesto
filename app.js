@@ -3,6 +3,7 @@ const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const cors = require("cors");
+const { errors } = require("celebrate");
 const mongoose = require("mongoose");
 const routes = require("./routes/index");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
@@ -25,6 +26,18 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(requestLogger);
 app.use(routes);
 app.use(errorLogger);
+
+app.use(errors());
+
+app.use((error, req, res, next) => {
+  const { statusCode = 500, message } = error;
+
+  res.status(statusCode).send({
+    message: statusCode === 500 ? "На сервере произошла ошибка" : message,
+  });
+
+  next();
+});
 
 // подключаемся к серверу mongo
 mongoose.connect("mongodb://localhost:27017/mestodb", {

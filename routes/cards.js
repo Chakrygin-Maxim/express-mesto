@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { validateId, validateCard } = require("../middlewares/validation");
 const {
   getCards,
   createCard,
@@ -11,10 +12,10 @@ const {
 router.get("/cards", getCards);
 
 // добавление карточки
-router.post("/cards", createCard);
+router.post("/cards", validateCard, createCard);
 
 // удаление карточки
-router.delete("/cards/:id", deleteCard);
+router.delete("/cards/:id", validateId, deleteCard);
 
 // поставить карточке лайк
 router.put("/cards/:cardId/likes", setLikeToCard);

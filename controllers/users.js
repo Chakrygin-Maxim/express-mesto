@@ -2,25 +2,23 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken"); //* модуль для создания jwt-токенов
 const User = require("../models/user");
 const { JWT_SECRET, JWT_TTL } = require("../config");
-const { sendError } = require("../errors/error");
+const AuthError = require("../errors/AuthError");
+const NotFoundError = require("../errors/NotFoundError");
+const ConflictError = require("../errors/ConflictError");
 
-function getUsers(req, res) {
-  User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => sendError(res, err));
-}
-
-function getUser(req, res) {
+function getUser(req, res, next) {
   User.findById(req.params.id)
 
     .then((user) => {
       if (user === null) {
-        res.status(404).send({ message: "Пользователь не найден!" });
-        return;
+        throw new NotFoundError({ message: "Пользователь не найден!" });
       }
       res.send(user);
     })
-    .catch((err) => sendError(res, err));
+    .catch((err) => {
+      throw new NotFoundError(err.message);
+    })
+    .catch(next);
 }
 
 function createUser(req, res, next) {
@@ -40,24 +38,22 @@ function createUser(req, res, next) {
     )
 
     .then((data) => {
-      res.send({
-        _id: data._id,
-        email: data.email,
-      });
+      const { _id, email } = data;
+      res.send({ data: { _id, email } });
     })
 
     .catch((error) => {
       if (error.name === "MongoError" || error.code === 11000) {
         // пользователь с такой почтой уже существует
-        throw new Error(error.message);
+        throw new ConflictError(error.message);
       }
 
-      throw new Error(error.message);
+      throw new ConflictError(error.message);
     })
     .catch(next);
 }
 
-function updateUserInfo(req, res) {
+function updateUserInfo(req, res, next) {
   const currentUserId = req.user._id;
   const { name, about } = req.body;
 
@@ -69,15 +65,18 @@ function updateUserInfo(req, res) {
   )
     .then((user) => {
       if (user === null) {
-        res.status(404).send({ message: "Пользователь не найден!" });
-        return;
+        throw new NotFoundError({ message: "Пользователь не найден!" });
       }
       res.send(user);
     })
-    .catch((err) => sendError(res, err));
+    .catch((err) => {
+      throw new AuthError(err.message);
+    })
+
+    .catch(next);
 }
 
-function updateUserAvatar(req, res) {
+function updateUserAvatar(req, res, next) {
   const currentUserId = req.user._id;
   const { avatar } = req.body;
 
@@ -89,12 +88,15 @@ function updateUserAvatar(req, res) {
   )
     .then((user) => {
       if (user === null) {
-        res.status(404).send({ message: "Пользователь не найден!" });
-        return;
+        throw new NotFoundError({ message: "Пользователь не найден!" });
       }
       res.send(user);
     })
-    .catch((err) => sendError(res, err));
+    .catch((err) => {
+      throw new AuthError(err.message);
+    })
+
+    .catch(next);
 }
 
 function login(req, res, next) {
@@ -105,29 +107,31 @@ function login(req, res, next) {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: JWT_TTL,
       });
+
       res.status(200).send({ token });
     })
-    .catch((error) => {
-      throw new Error(error.message);
+    .catch((err) => {
+      throw new AuthError(err.message);
     })
 
     .catch(next);
 }
 
-function userInfo(req, res) {
+function userInfo(req, res, next) {
   User.findById(req.user._id)
     .then((data) => {
       if (data === null) {
-        res.status(404).send({ message: "Пользователь не найден!" });
-        return;
+        throw new NotFoundError({ message: "Пользователь не найден!" });
       }
       res.send({ data });
     })
-    .catch((err) => sendError(res, err));
+    .catch((err) => {
+      throw new NotFoundError(err.message);
+    })
+    .catch(next);
 }
 
 module.exports = {
-  getUsers,
   getUser,
   createUser,
   updateUserInfo,
