@@ -15,8 +15,8 @@ function getUser(req, res, next) {
       }
       res.send(user);
     })
-    .catch((err) => {
-      throw new NotFoundError(err.message);
+    .catch(() => {
+      throw new NotFoundError("Пользователь не найден!");
     })
     .catch(next);
 }
