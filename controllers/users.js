@@ -11,7 +11,7 @@ function getUser(req, res, next) {
 
     .then((user) => {
       if (user === null) {
-        throw new NotFoundError({ message: "Пользователь не найден!" });
+        throw new NotFoundError("Пользователь не найден!");
       }
       res.send(user);
     })
@@ -22,22 +22,28 @@ function getUser(req, res, next) {
 }
 
 function createUser(req, res, next) {
+  // eslint-disable-next-line object-curly-newline
   const { name, about, avatar, email, password } = req.body;
 
   bcrypt
     .hash(password, 10)
     // eslint-disable-next-line no-shadow
-    .then((password) =>
-      User.create({
-        name,
-        about,
-        avatar,
-        email,
-        password,
-      })
+    .then(
+      // eslint-disable-next-line no-shadow
+      (password) =>
+        // eslint-disable-next-line implicit-arrow-linebreak
+        User.create({
+          name,
+          about,
+          avatar,
+          email,
+          password,
+          // eslint-disable-next-line comma-dangle
+        })
+      // eslint-disable-next-line function-paren-newline
     )
-
     .then((data) => {
+      // eslint-disable-next-line no-shadow
       const { _id, email } = data;
       res.send({ data: { _id, email } });
     })
@@ -65,7 +71,7 @@ function updateUserInfo(req, res, next) {
   )
     .then((user) => {
       if (user === null) {
-        throw new NotFoundError({ message: "Пользователь не найден!" });
+        throw new NotFoundError("Пользователь не найден!");
       }
       res.send(user);
     })
@@ -88,7 +94,7 @@ function updateUserAvatar(req, res, next) {
   )
     .then((user) => {
       if (user === null) {
-        throw new NotFoundError({ message: "Пользователь не найден!" });
+        throw new NotFoundError("Пользователь не найден!");
       }
       res.send(user);
     })
@@ -121,7 +127,7 @@ function userInfo(req, res, next) {
   User.findById(req.user._id)
     .then((data) => {
       if (data === null) {
-        throw new NotFoundError({ message: "Пользователь не найден!" });
+        throw new NotFoundError("Пользователь не найден!");
       }
       res.send({ data });
     })

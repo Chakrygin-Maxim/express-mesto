@@ -15,14 +15,13 @@ function createCard(req, res, next) {
 
   Card.create({ name, link, owner: req.user._id })
     .then((card) => {
-      const { likes, link, name, owner, _id } = card;
       res.send({
-        likes,
-        link,
-        name,
-        _id,
+        likes: card.likes,
+        link: card.link,
+        name: card.name,
+        _id: card._id,
         owner: {
-          _id: owner,
+          _id: card.owner,
         },
       });
     })
@@ -38,12 +37,10 @@ function deleteCard(req, res, next) {
   Card.findById(req.params.id)
     .then((card) => {
       if (card === null) {
-        throw new NotFoundError({ message: "Карточка не найдена" });
+        throw new NotFoundError("Карточка не найдена");
       }
       if (card.owner.toString() !== currentUserId) {
-        throw new ForbiddenError({
-          message: "Недостаточно прав на удаление карточки",
-        });
+        throw new ForbiddenError("Недостаточно прав на удаление карточки");
       }
       Card.findByIdAndDelete(req.params.id)
         .then((data) => res.send(data))
@@ -57,34 +54,42 @@ function deleteCard(req, res, next) {
 
 function setLikeToCard(req, res, next) {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params.id,
     { $addToSet: { likes: req.user._id } },
     // eslint-disable-next-line comma-dangle
     { new: true }
   )
+    .orFail()
     .populate("owner")
     .then((data) => {
       if (data === null) {
-        throw new NotFoundError({ message: "Карточка не найдена" });
+        throw new NotFoundError("Карточка не найдена");
       }
       res.send(data);
+    })
+    .catch(() => {
+      throw new NotFoundError("Карточка не найдена");
     })
     .catch(next);
 }
 
 function setDislikeToCard(req, res, next) {
   Card.findByIdAndUpdate(
-    req.params.cardId,
+    req.params.id,
     { $pull: { likes: req.user._id } },
     // eslint-disable-next-line comma-dangle
     { new: true }
   )
+    .orFail()
     .populate("owner")
     .then((data) => {
       if (data === null) {
-        throw new NotFoundError({ message: "Карточка не найдена" });
+        throw new NotFoundError("Карточка не найдена");
       }
       res.send(data);
+    })
+    .catch(() => {
+      throw new NotFoundError("Карточка не найдена");
     })
     .catch(next);
 }

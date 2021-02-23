@@ -18,9 +18,4 @@ router.post("/signup", validateNewUser, createUser);
 router.use(auth);
 router.use(usersRouter, cardsRouter);
 
-// заглушка других запросов на несуществующий адрес
-router.use("/*", (req, res) => {
-  res.status(404).send({ message: "Запрашиваемый ресурс не найден" });
-});
-
 module.exports = router;

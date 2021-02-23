@@ -5,6 +5,7 @@ const rateLimit = require("express-rate-limit");
 const cors = require("cors");
 const { errors } = require("celebrate");
 const mongoose = require("mongoose");
+const NotFoundError = require("./errors/NotFoundError");
 const routes = require("./routes/index");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 
@@ -25,6 +26,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 app.use(routes);
+
+// заглушка других запросов на несуществующий адрес
+app.use("*", () => {
+  throw new NotFoundError("Запрашиваемый ресурс не найден");
+});
+
 app.use(errorLogger);
 
 app.use(errors());
