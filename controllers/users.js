@@ -15,7 +15,8 @@ function getUser(req, res, next) {
       }
       res.send(user);
     })
-    .catch(() => {
+    // eslint-disable-next-line no-unused-vars
+    .catch((err) => {
       throw new NotFoundError("Пользователь не найден!");
     })
     .catch(next);
