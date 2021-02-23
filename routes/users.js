@@ -1,25 +1,25 @@
 const router = require("express").Router();
 const {
-  getUsers,
+  validateId,
+  validateUserInfo,
+  validateUserAvatar,
+} = require("../middlewares/validation");
+const {
   getUser,
-  createUser,
   updateUserInfo,
   updateUserAvatar,
+  userInfo,
 } = require("../controllers/users");
 
-// отправка полного списка пользователей
-router.get("/users", getUsers);
+router.get("/users/me", userInfo);
 
 // поиск пользователя по id
-router.get("/users/:id", getUser);
-
-// создание пользователя
-router.post("/users", createUser);
+router.get("/users/:id", validateId, getUser);
 
 // обновление профиля
-router.patch("/users/me", updateUserInfo);
+router.patch("/users/me", validateUserInfo, updateUserInfo);
 
 // обновление аватара
-router.patch("/users/me/avatar", updateUserAvatar);
+router.patch("/users/me/avatar", validateUserAvatar, updateUserAvatar);
 
 module.exports = router;
