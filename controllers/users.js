@@ -116,13 +116,12 @@ function login(req, res, next) {
 
 function userInfo(req, res) {
   User.findById(req.user._id)
-    .then((user) => {
-      if (user === null) {
+    .then((data) => {
+      if (data === null) {
         res.status(404).send({ message: "Пользователь не найден!" });
         return;
       }
-      const { _id, name, about, avatar } = user;
-      res.send({ _id, name, about, avatar });
+      res.send({ data });
     })
     .catch((err) => sendError(res, err));
 }

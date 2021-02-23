@@ -2,6 +2,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
+const cors = require("cors");
 const mongoose = require("mongoose");
 const routes = require("./routes/index");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
@@ -14,6 +15,7 @@ const limiter = rateLimit({
   max: 100, // limit each IP to 100 requests per windowMs
 });
 
+app.use(cors());
 app.use(helmet());
 app.use(limiter);
 
