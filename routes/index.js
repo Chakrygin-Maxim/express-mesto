@@ -1,5 +1,4 @@
 const router = require("express").Router();
-const auth = require("../middlewares/auth");
 const { createUser, login } = require("../controllers/users");
 const { validateNewUser, validateLogin } = require("../middlewares/validation");
 
@@ -15,7 +14,6 @@ router.get("/crash-test", () => {
 router.post("/signin", validateLogin, login);
 router.post("/signup", validateNewUser, createUser);
 
-router.use(auth);
 router.use(usersRouter, cardsRouter);
 
 module.exports = router;
